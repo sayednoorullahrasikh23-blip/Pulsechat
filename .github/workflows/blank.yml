@@ -19,18 +19,17 @@ jobs:
         java-version: '17'
         distribution: 'zulu'
 
-    # این مرحله فایلهای خراب مانیفست را کاملا حذف کرده و مانیفست استاندارد جدید میسازد
-     Caviar:
+    - name: Setup Gradle Environment
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Create Clean Manifest
       run: |
-        rm -f app/src/main/AndroidManifest.xml
+        rm -rf app/src/main/AndroidManifest.xml || true
         mkdir -p app/src/main
         echo '<?xml version="1.0" encoding="utf-8"?><manifest xmlns:android="http://android.com"><application android:allowBackup="true" android:icon="@mipmap/ic_launcher" android:label="@string/app_name" android:supportsRtl="true" android:theme="@style/Theme.PulseChat"><activity android:name=".MainActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter></activity></application></manifest>' > app/src/main/AndroidManifest.xml
 
-    - name: Fix Gradle Wrapper Permissions
-      run: chmod +x gradlew
-
-    - name: Build with Gradle
-      run: ./gradlew assembleDebug --no-build-cache --no-daemon
+    - name: Build Debug APK
+      run: gradle assembleDebug --no-daemon
 
     - name: Upload Finished APK
       uses: actions/upload-artifact@v4
