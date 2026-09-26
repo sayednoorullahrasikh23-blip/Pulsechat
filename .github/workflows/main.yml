@@ -1,3 +1,4 @@
+
 name: Android CI
 
 on:
@@ -21,15 +22,26 @@ jobs:
 
     - name: Clean Manifest Fix
       run: |
-        rm -f app/src/main/AndroidManifest.xml
-        mkdir -p app/src/main
-        echo '<?xml version="1.0" encoding="utf-8"?><manifest xmlns:android="http://android.com"><application android:allowBackup="true" android:icon="@mipmap/ic_launcher" android:label="@string/app_name" android:supportsRtl="true" android:theme="@style/Theme.PulseChat"><activity android:name=".MainActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter></activity></application></manifest>' > app/src/main/AndroidManifest.xml
+        rm -f app/src/main/AndroidManifest.xml || true
+        rm -f pulsechat_phone/app/src/main/AndroidManifest.xml || true
+        mkdir -p pulsechat_phone/app/src/main
+        echo '<?xml version="1.0" encoding="utf-8"?><manifest xmlns:android="http://android.com"><application android:allowBackup="true" android:icon="@mipmap/ic_launcher" android:label="@string/app_name" android:supportsRtl="true" android:theme="@style/Theme.PulseChat"><activity android:name=".MainActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter></activity></application></manifest>' > pulsechat_phone/app/src/main/AndroidManifest.xml
 
     - name: Fix Gradle Wrapper Permissions
-      run: chmod +x gradlew
+      run: |
+        if [ -f "pulsechat_phone/gradlew" ]; then
+          chmod +x pulsechat_phone/gradlew
+        elif [ -f "gradlew" ]; then
+          chmod +x gradlew
+        fi
 
     - name: Build with Gradle
-      run: ./gradlew assembleDebug --no-build-cache --no-daemon
+      run: |
+        if [ -d "pulsechat_phone" ]; then
+          cd pulsechat_phone && ./gradlew assembleDebug --no-build-cache --no-daemon
+        else
+          ./gradlew assembleDebug --no-build-cache --no-daemon
+        fi
 
     - name: Upload Finished APK
       uses: actions/upload-artifact@v4
