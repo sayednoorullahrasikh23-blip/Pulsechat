@@ -1,4 +1,3 @@
-
 name: Android CI
 
 on:
@@ -20,31 +19,25 @@ jobs:
         java-version: '17'
         distribution: 'zulu'
 
-    - name: Clean Manifest Fix
-      run: |
-        rm -f app/src/main/AndroidManifest.xml || true
-        rm -f pulsechat_phone/app/src/main/AndroidManifest.xml || true
-        mkdir -p pulsechat_phone/app/src/main
-        echo '<?xml version="1.0" encoding="utf-8"?><manifest xmlns:android="http://android.com"><application android:allowBackup="true" android:icon="@mipmap/ic_launcher" android:label="@string/app_name" android:supportsRtl="true" android:theme="@style/Theme.PulseChat"><activity android:name=".MainActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter></activity></application></manifest>' > pulsechat_phone/app/src/main/AndroidManifest.xml
+    # ۱. تولید و نصب خودکار ابزار گریدل روی سرور ابری برای حل ارور عدم وجود فایل
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
 
-    - name: Fix Gradle Wrapper Permissions
+    # ۲. ایجاد اجباری فایل دسترسی مانیفست استاندارد
+     Caviar:
       run: |
-        if [ -f "pulsechat_phone/gradlew" ]; then
-          chmod +x pulsechat_phone/gradlew
-        elif [ -f "gradlew" ]; then
-          chmod +x gradlew
-        fi
+        rm -rf app/src/main/AndroidManifest.xml || true
+        mkdir -p app/src/main
+        echo '<?xml version="1.0" encoding="utf-8"?><manifest xmlns:android="http://android.com"><application android:allowBackup="true" android:icon="@mipmap/ic_launcher" android:label="@string/app_name" android:supportsRtl="true" android:theme="@style/Theme.PulseChat"><activity android:name=".MainActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter></activity></application></manifest>' > app/src/main/AndroidManifest.xml
 
-    - name: Build with Gradle
-      run: |
-        if [ -d "pulsechat_phone" ]; then
-          cd pulsechat_phone && ./gradlew assembleDebug --no-build-cache --no-daemon
-        else
-          ./gradlew assembleDebug --no-build-cache --no-daemon
-        fi
+    # ۳. کامپایل نهایی و ساخت فایل با ابزار بومی سرور
+    - name: Build Debug APK with Gradle Native
+      run: gradle assembleDebug --no-daemon
 
+    # ۴. آپلود فایل ساخته شده برای دانلود مستقیم شما
     - name: Upload Finished APK
       uses: actions/upload-artifact@v4
       with:
         name: pulsechat-app
         path: "**/build/outputs/apk/debug/*.apk"
+
