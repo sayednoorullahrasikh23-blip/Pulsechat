@@ -19,8 +19,7 @@ jobs:
         java-version: '17'
         distribution: 'zulu'
 
-    # این مرحله فایلهای خراب مانیفست را کاملا حذف کرده و مانیفست استاندارد جدید میسازد
-     Caviar:
+    - name: Clean Manifest Fix
       run: |
         rm -f app/src/main/AndroidManifest.xml
         mkdir -p app/src/main
