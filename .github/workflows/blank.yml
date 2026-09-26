@@ -1,4 +1,3 @@
-
 name: Android CI
 
 on:
@@ -20,7 +19,8 @@ jobs:
         java-version: '17'
         distribution: 'zulu'
 
-    - name: Force Clean Manifest Fix
+    # این مرحله فایلهای خراب مانیفست را کاملا حذف کرده و مانیفست استاندارد جدید میسازد
+     Caviar:
       run: |
         rm -f app/src/main/AndroidManifest.xml
         mkdir -p app/src/main
